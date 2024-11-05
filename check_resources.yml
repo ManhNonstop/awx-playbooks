@@ -1,0 +1,56 @@
+---
+- name: Kiểm tra tài nguyên trên server Linux
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Thu thập thông tin hệ thống
+      setup:
+
+    - name: Kiểm tra sử dụng CPU
+      command: "mpstat 1 1"
+      register: cpu_usage
+      ignore_errors: yes
+
+    - name: Hiển thị sử dụng CPU
+      debug:
+        msg: "{{ cpu_usage.stdout }}"
+
+    - name: Kiểm tra sử dụng bộ nhớ
+      command: "free -m"
+      register: memory_usage
+      ignore_errors: yes
+
+    - name: Hiển thị sử dụng bộ nhớ
+      debug:
+        msg: "{{ memory_usage.stdout }}"
+
+    - name: Kiểm tra dung lượng đĩa
+      command: "df -h"
+      register: disk_usage
+      ignore_errors: yes
+
+    - name: Hiển thị dung lượng đĩa
+      debug:
+        msg: "{{ disk_usage.stdout }}"
+
+    - name: Kiểm tra trạng thái dịch vụ nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      register: nginx_service
+      ignore_errors: yes
+
+    - name: Hiển thị trạng thái dịch vụ nginx
+      debug:
+        msg: "Trạng thái dịch vụ nginx: {{ nginx_service.state }}"
+
+    - name: Kiểm tra các dịch vụ đang chạy
+      command: "systemctl list-units --type=service --state=running"
+      register: running_services
+      ignore_errors: yes
+
+    - name: Hiển thị các dịch vụ đang chạy
+      debug:
+        msg: "{{ running_services.stdout }}"
